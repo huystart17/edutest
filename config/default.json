@@ -1,0 +1,56 @@
+{
+  "host": "localhost",
+  "port": 3030,
+  "public": "../public/",
+  "paginate": {
+    "default": 10,
+    "max": 50
+  },
+  "mongodb": "mongodb://localhost:27017/edutest",
+  "authentication": {
+    "secret": "524821bcae641093fb13d377e70726eedc81f657a312bd3d2fa5ce68fa3a598083eca586f146f77d0e6ed916e552d18c01ad3e3c7a8703282610e8a3d7e87940c89e7e6e08d16b8218b189ff950a215328ab8a1f06386b37fef49cf5a3b7c16b66939046907445212f3dc932a268a51c5d6fe164d43a8ddffc3b3768a2b190d7a95dc1a32d508a823eaae996956739d2e0c8dd3c8a4bc28a4f80c25f0bd927c587c987dae6723bc3049d424f96515f29dc3f1cf4045b7f1b823f4b39f84fcf377177fad6a52cff63ada207384b07866a355c590ca695621ea02603be7269e8de2711c8424e6c664d2352108973677102e7b51a86b87fd510f91aac598e6a5556",
+    "strategies": [
+      "jwt"
+      ,"local"
+    ],
+    "path": "/authentication",
+    "service": "users",
+    "jwt": {
+      "header": {
+        "type": "access"
+      },
+      "audience": "https://yourdomain.com",
+      "subject": "anonymous",
+      "issuer": "feathers",
+      "algorithm": "HS256",
+      "expiresIn": "1d"
+    },
+    "facebook": {
+      "clientID": "your facebook client id",
+      "clientSecret": "your facebook client secret",
+      "successRedirect": "/",
+      "scope": [
+        "public_profile",
+        "email"
+      ],
+      "profileFields": [
+        "id",
+        "displayName",
+        "first_name",
+        "last_name",
+        "email",
+        "gender",
+        "profileUrl",
+        "birthday",
+        "picture",
+        "permissions"
+      ]
+    },
+    "cookie": {
+      "enabled": true,
+      "name": "edutest",
+      "httpOnly": false,
+      "secure": false
+    }
+  }
+}

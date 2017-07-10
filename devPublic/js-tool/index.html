@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+    <meta charset="UTF-8">
+    <title>Convert text to question</title>
+    <script src="//unpkg.com/mithril/mithril.js"></script>
+
+</head>
+<body>
+<div id='toeic-data'>
+
+</div>
+<p id='toeic-test'></p>
+<script>
+        function getQuestion(text) {
+            let textF = text.trim().split('\\n')
+            let lines = textF.map(t => t.trim()).filter(t => t.length > 0)
+            let matchQuestion = /^\d+./
+            let imgMatch = /^img\./
+            let matchAnswer = /^\([abcdABCD]\)|^[ABCDabcd]\./
+            let matchTrue = /^(True)|(true)\./
+            let questions = []
+            let qCount = 0
+
+            function addQ(content, answers, trueIndex, img) {
+                questions.push({content: content, answer: answers, trueIndex: trueIndex, img: img})
+                qCount++
+            }
+
+            let contenTemp = ''
+            let answersTemp = []
+            let trueIndexTemp = ''
+            let imgTemp = ''
+            lines.map(line => {
+                if (line.match(imgMatch)) {
+                    imgTemp = line.split('img.')[1]
+                }
+                else if ((!line.match(matchTrue)) && (!line.match(matchAnswer))) {
+                    if (line.trim().length > 0) {
+                        contenTemp = contenTemp + line + '\\n'
+                    }
+                }
+
+                if (line.match(matchAnswer)) {
+                    answersTemp.push(line)
+                } else if (line.match(matchTrue)) {
+                    let ans = line.split('.')[1]
+                    ans = ans.trim().toLowerCase()
+                    ans == 'a' ? ans = 0
+                        : ans == 'b' ? ans = 1
+                        : ans == 'c' ? ans = 2
+                        : ans == 'd' ? ans = 3
+                        : ''
+                    trueIndexTemp = ans
+                    addQ(contenTemp.trim(), answersTemp, trueIndexTemp, imgTemp)
+                    contenTemp = ''
+                    answersTemp = []
+                    trueIndexTemp = ''
+                    imgTemp = ''
+                }
+            })
+            return questions
+        }
+        const test = {
+            oninit: () => {
+                let text = document.getElementById('toeic-data').textContent
+                document.getElementById('toeic-data').style.display = 'none'
+                console.log(text)
+                test.data = getQuestion(text)
+                console.log(test.data)
+                test.cal = function () {
+                    test.userAnswer = test.data.map((q, index) => {
+                        return document.getElementById('toeicTest')['q' + index].value
+                    })
+                    test.totalScore = test.cal_result(test.data, test.userAnswer)
+                    try {
+                        let point = document.getElementById('point')
+                        point.value = test.totalScore
+                    } catch (err) {
+                        console.log(err)
+                    }
+                }
+            },
+
+            data: [],
+            userAnswer: [],
+            cal_result: function (data, answers) {
+                console.log(answers)
+                let score = 0
+                data.forEach((q, index) => {
+                    q.trueIndex.toString() === answers[index] ? score++ : ''
+                })
+                return score * 50
+            },
+            totalScore: 0,
+            getPoint: function () {
+                test.userAnswer = test.data.map((q, index) => {
+                    return document.getElementById('toeicTest')['q' + index].value
+                })
+                test.totalScore = test.cal_result(test.data, test.userAnswer)
+                let point = document.getElementById('point')
+                point.value = test.totalScore
+            },
+            view: () => m('div',
+                m('h4', 'Test toeic'),
+                m('form#toeicTest', {
+                        onsubmit: e => {
+                            e.preventDefault();
+                        },
+                        style: {color: 'black'}
+                    },
+                    test.data.map((q, index) => m('p',
+                        q.img.length > 0 ? m('div', m('img', {src: q.img})) : '',
+                        m('p', m.trust(q.content.replace(/\\n\\r?/g, '<br />')), m('br'),
+                            q.answer.map((a, ansIndex) => m('label', m('input[type=radio]', {
+                                name: 'q' + index,
+                                value: ansIndex
+                            }), a, m('br')))
+                        )
+                        )
+                    ),
+                    m('p', 'Your total point ', test.totalScore ? test.totalScore : 0),
+                    m('button', {
+                        onclick: test.getPoint
+                    }, 'Get total point')
+                )
+            )
+        }
+        m.mount(document.getElementById('toeic-test'), test)
+</script>
+</body>
+</html>
